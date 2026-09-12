@@ -1,0 +1,11 @@
+{
+  "name": "Challenge Arena",
+  "short_name": "Challenge Arena",
+  "description": "Daily challenges, quizzes and brain games.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f7fb",
+  "theme_color": "#111827",
+  "icons": []
+}

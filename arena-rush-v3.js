@@ -12,22 +12,35 @@
 
   const next = document.getElementById('arenaV3Next');
   const hint = document.getElementById('arenaV3Hint');
-  let round = Number(localStorage.getItem('challengeArenaRound') || 1);
+  let round = Math.max(1, Number(localStorage.getItem('challengeArenaRound') || 1));
 
   function showRound(){
     if(hint) hint.textContent = `Round ${round} • Collect 10 cores and beat your previous score.`;
   }
   if(next) next.addEventListener('click', () => {
-    round += 1;
-    localStorage.setItem('challengeArenaRound', String(round));
+    const retry = next.dataset.retry === '1';
+    if (!retry) {
+      round += 1;
+      localStorage.setItem('challengeArenaRound', String(round));
+    }
     next.classList.add('hidden');
+    next.dataset.retry = '0';
     showRound();
     if(typeof window.startArenaRush === 'function') window.startArenaRush();
   });
   window.addEventListener('arenaRushFinished', (e) => {
     const d=e.detail||{};
-    if(next){ next.classList.remove('hidden'); next.textContent = d.won ? '🔥 Play Next Round →' : '⚡ Try Again →'; }
-    if(hint) hint.textContent = d.won ? `Round ${round} cleared! Beat ${Number(d.score)||0} pts next time.` : `Round ${round} complete. Try again and improve your score.`;
+    if(next){
+      next.classList.remove('hidden');
+      if(d.won){
+        next.dataset.retry = '0';
+        next.textContent = '🔥 Play Next Round →';
+      } else {
+        next.dataset.retry = '1';
+        next.textContent = '⚡ Try Again →';
+      }
+    }
+    if(hint) hint.textContent = d.won ? `Round ${round} cleared! Next round is ready.` : `Round ${round} not cleared. Try again — same round.`;
   });
   showRound();
 })();

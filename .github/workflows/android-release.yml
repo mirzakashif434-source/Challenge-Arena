@@ -1,4 +1,4 @@
-name: Build Challenge Arena Android AAB
+name: Build Challenge Arena Android APK
 
 on:
   push:
@@ -26,11 +26,11 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.13'
-      - name: Build unsigned release AAB
+      - name: Build debug APK
         working-directory: android
-        run: gradle bundleRelease --no-daemon
-      - name: Upload AAB
+        run: gradle assembleDebug --no-daemon
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: challenge-arena-release-aab
-          path: android/app/build/outputs/bundle/release/app-release.aab
+          name: challenge-arena-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk

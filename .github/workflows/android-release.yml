@@ -29,8 +29,15 @@ jobs:
       - name: Build release APK
         working-directory: android
         run: gradle assembleRelease --no-daemon
+      - name: Locate release APK
+        run: |
+          APK=$(find android -type f -name '*.apk' | head -n 1)
+          test -n "$APK"
+          cp "$APK" challenge-arena-release.apk
+          echo "APK found at $APK"
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: challenge-arena-release-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
+          path: challenge-arena-release.apk
+          if-no-files-found: error

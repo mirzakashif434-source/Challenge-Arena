@@ -25,17 +25,6 @@
     return Array.from({length:5},(_,i)=>sets[(seed+i)%sets.length]);
   }
 
-  async function saveAiAttempt(score,correct,total){
-    try{
-      const client=window.challengeArenaSupabase;
-      const user=window.challengeArenaCurrentUser;
-      if(client&&user){
-        const {error}=await client.from('game_attempts').insert({user_id:user.id,category:'ai',score,correct_answers:correct,total_questions:total});
-        if(error) console.warn('AI attempt sync failed:',error.message);
-      }
-    }catch(e){console.warn('AI attempt sync failed:',e);}
-  }
-
   function openQuiz(questions,title){
     let i=0,correct=0,score=0;
     const clean=(questions||[]).filter(q=>q&&typeof q[0]==='string'&&Array.isArray(q[1])&&q[1].length>=2&&Number.isInteger(q[2])&&q[2]>=0&&q[2]<q[1].length).slice(0,5);
@@ -46,7 +35,7 @@
     const progress=modal.querySelector('#aiProgress'),question=modal.querySelector('#aiQuestion'),answers=modal.querySelector('#aiAnswers'),feedback=modal.querySelector('#aiFeedback'),next=modal.querySelector('#aiNext');
     function render(){
       const q=clean[i]; progress.textContent='Question '+(i+1)+' of '+clean.length; question.textContent=q[0]; feedback.textContent=''; next.classList.add('hidden'); answers.innerHTML='';
-      q[1].forEach((v,n)=>{const b=document.createElement('button');b.className='answer';b.textContent=String(v);b.onclick=()=>answer(n);answers.appendChild(b);});
+      q[1].forEach(v=>{const b=document.createElement('button');b.className='answer';b.textContent=String(v);b.onclick=()=>answer(Array.from(answers.children).indexOf(b));answers.appendChild(b);});
     }
     function answer(n){
       const q=clean[i]; answers.querySelectorAll('button').forEach(b=>b.disabled=true);
@@ -54,12 +43,10 @@
       else feedback.textContent='❌ Correct answer: '+String(q[1][q[2]]);
       next.textContent=i===clean.length-1?'Finish →':'Next →'; next.classList.remove('hidden');
     }
-    next.onclick=async()=>{if(i<clean.length-1){i++;render();}else{
+    next.onclick=()=>{if(i<clean.length-1){i++;render();}else{
       question.textContent='🎉 AI Challenge Complete';progress.textContent='Finished';answers.innerHTML='';feedback.textContent='Score: '+score+' points · '+correct+'/'+clean.length+' correct';next.classList.add('hidden');
-      const user=window.challengeArenaCurrentUser;
       if(typeof window.challengeArenaRecordExternalScore==='function') window.challengeArenaRecordExternalScore(score,correct,clean.length,'ai');
-      await saveAiAttempt(score,correct,clean.length);
-      if(user) status.textContent='✅ AI challenge complete. Score synced to your account.'; else status.textContent='✅ AI challenge complete. Sign in to sync your score.';
+      status.textContent=window.challengeArenaCurrentUser?'✅ AI challenge complete. Score synced to your account.':'✅ AI challenge complete. Sign in to sync your score.';
     }};
     modal.querySelector('#aiClose').onclick=()=>modal.remove();
     render();

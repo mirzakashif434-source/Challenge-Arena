@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mirzakashif434-source.github.io/Challenge-Arena/sitemap.xml
